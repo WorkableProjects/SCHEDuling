@@ -15,12 +15,8 @@
   framework = "vite"
   targetPort = 5173
 
-# Single-page app: everything that isn't a file or /api falls through to index.html.
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 404
-
+# API routes are declared in each function's `config.path` (netlify/functions/*.ts).
+# Single-page app: everything that isn't a file falls through to index.html.
 [[redirects]]
   from = "/*"
   to = "/index.html"

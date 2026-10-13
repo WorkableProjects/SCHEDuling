@@ -73,7 +73,7 @@ r.get('/api/people/attendees', ['admin'], async (c) => {
   const ev = await getEventByIdOrSlug(c.db, eventId);
   const rows = await c.db.select({
     userId: schema.users.id, name: schema.users.name, email: schema.users.email, role: schema.eventMembers.roleInEvent,
-    ticketType: schema.eventMembers.ticketType, checkedInAt: schema.eventMembers.checkedInAt, status: schema.users.status, joinedAt: schema.eventMembers.createdAt,
+    ticketType: schema.eventMembers.ticketType, checkedInAt: schema.eventMembers.checkedInAt, status: schema.users.status, joinedAt: schema.eventMembers.createdAt, qrToken: schema.eventMembers.qrToken,
   }).from(schema.eventMembers).innerJoin(schema.users, eq(schema.users.id, schema.eventMembers.userId))
     .where(eq(schema.eventMembers.eventId, ev.id)).orderBy(asc(schema.users.name));
   return json({ attendees: rows });

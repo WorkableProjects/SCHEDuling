@@ -1,8 +1,33 @@
 import { getStore } from '@netlify/blobs';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { randomToken } from './crypto';
 import { badRequest } from './http';
 
-export const store = () => getStore({ name: 'uploads', consistency: 'strong' });
+type BlobStore = {
+  set(key: string, data: ArrayBuffer | Uint8Array, opts?: { metadata?: Record<string, unknown> }): Promise<unknown>;
+  get(key: string, opts: { type: 'arrayBuffer' }): Promise<ArrayBuffer | null>;
+  getWithMetadata(key: string, opts: { type: 'arrayBuffer' }): Promise<{ data: ArrayBuffer; metadata: Record<string, unknown> } | null>;
+  delete(key: string): Promise<unknown>;
+};
+
+/** Local-dev stand-in (only when LOCAL_BLOBS_DIR is set): same API, files on disk. Production always uses Netlify Blobs. */
+function localStore(dir: string): BlobStore {
+  const file = (k: string) => join(dir, encodeURIComponent(k));
+  return {
+    async set(k, data, o) { await mkdir(dir, { recursive: true }); await writeFile(file(k), new Uint8Array(data as ArrayBuffer)); await writeFile(file(k) + '.meta', JSON.stringify(o?.metadata ?? {})); },
+    async get(k) { try { const b = await readFile(file(k)); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer; } catch { return null; } },
+    async getWithMetadata(k) {
+      const data = await this.get(k, { type: 'arrayBuffer' });
+      if (!data) return null;
+      return { data, metadata: JSON.parse(await readFile(file(k) + '.meta', 'utf8').catch(() => '{}')) };
+    },
+    async delete(k) { await rm(file(k), { force: true }); await rm(file(k) + '.meta', { force: true }); },
+  };
+}
+
+export const store = (): BlobStore =>
+  process.env.LOCAL_BLOBS_DIR ? localStore(process.env.LOCAL_BLOBS_DIR) : (getStore({ name: 'uploads', consistency: 'strong' }) as unknown as BlobStore);
 
 export const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 // Netlify synchronous functions accept ~6 MB request bodies, so stay under that.

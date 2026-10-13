@@ -8,8 +8,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "netlify dev",
-    "dev:web": "vite",
+    "dev": "vite",
+    "dev:netlify": "netlify dev",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate && node scripts/sync-migrations.mjs",
