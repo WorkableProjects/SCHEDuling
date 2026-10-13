@@ -1,0 +1,10 @@
+node_modules
+dist
+.netlify
+.e2e-blobs
+.env
+.env.*
+!.env.example
+test-results
+playwright-report
+*.log
