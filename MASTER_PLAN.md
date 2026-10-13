@@ -2,6 +2,8 @@
 
 Builds on [`plan.md`](plan.md) and the Sched.com Full Spec PDF. Constraints: Netlify Database + Netlify Blobs only (no external DB/services, D1 fallback dropped); exactly two admin accounts; core focus on attendees, speakers, admins, and check-in; call-for-papers and other minor features deferred.
 
+App Name --> SCHEDuling
+
 ## 1. Scope and priorities
 | Priority | Feature area | Source |
 |---|---|---|
